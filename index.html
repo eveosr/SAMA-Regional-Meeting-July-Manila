@@ -449,13 +449,13 @@
     current = Math.max(0, Math.min(slides.length - 1, i));
     const target = slides[current].offsetTop;
     // Smooth for single steps; instant for multi-slide jumps (snap-stop halts long smooth scrolls)
-    const behavior = Math.abs(current - from) > 1 ? 'auto' : 'smooth';
+    const behavior = Math.abs(current - from) > 1 ? 'instant' : 'smooth';
     deck.scrollTo({ top: target, behavior });
     updateDots();
     // Watchdog: if the smooth scroll was interrupted by snap, force-arrive
     clearTimeout(arriveTimer);
     arriveTimer = setTimeout(() => {
-      if (Math.abs(deck.scrollTop - target) > 4) deck.scrollTo({ top: target, behavior: 'auto' });
+      if (Math.abs(deck.scrollTop - target) > 4) deck.scrollTo({ top: target, behavior: 'instant' });
     }, 700);
   }
 
