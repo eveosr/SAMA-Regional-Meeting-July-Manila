@@ -443,10 +443,20 @@
     return closest;
   }
 
+  let arriveTimer = null;
   function goTo(i) {
+    const from = current;
     current = Math.max(0, Math.min(slides.length - 1, i));
-    slides[current].scrollIntoView({ behavior: 'smooth' });
+    const target = slides[current].offsetTop;
+    // Smooth for single steps; instant for multi-slide jumps (snap-stop halts long smooth scrolls)
+    const behavior = Math.abs(current - from) > 1 ? 'auto' : 'smooth';
+    deck.scrollTo({ top: target, behavior });
     updateDots();
+    // Watchdog: if the smooth scroll was interrupted by snap, force-arrive
+    clearTimeout(arriveTimer);
+    arriveTimer = setTimeout(() => {
+      if (Math.abs(deck.scrollTop - target) > 4) deck.scrollTo({ top: target, behavior: 'auto' });
+    }, 700);
   }
 
   // Sync state only after manual scrolling settles
