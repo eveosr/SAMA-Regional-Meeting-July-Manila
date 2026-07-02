@@ -444,18 +444,27 @@
   }
 
   let arriveTimer = null;
+  function jumpNow(target) {
+    // Direct assignment with scroll-behavior temporarily disabled = truly instant,
+    // immune to CSS smooth-scroll and scroll-snap-stop interruptions.
+    deck.style.scrollBehavior = 'auto';
+    deck.scrollTop = target;
+    requestAnimationFrame(() => { deck.style.scrollBehavior = ''; });
+  }
   function goTo(i) {
     const from = current;
     current = Math.max(0, Math.min(slides.length - 1, i));
     const target = slides[current].offsetTop;
-    // Smooth for single steps; instant for multi-slide jumps (snap-stop halts long smooth scrolls)
-    const behavior = Math.abs(current - from) > 1 ? 'instant' : 'smooth';
-    deck.scrollTo({ top: target, behavior });
+    if (Math.abs(current - from) > 1) {
+      jumpNow(target);
+    } else {
+      deck.scrollTo({ top: target, behavior: 'smooth' });
+    }
     updateDots();
-    // Watchdog: if the smooth scroll was interrupted by snap, force-arrive
+    // Watchdog: if a smooth step was interrupted, force-arrive
     clearTimeout(arriveTimer);
     arriveTimer = setTimeout(() => {
-      if (Math.abs(deck.scrollTop - target) > 4) deck.scrollTo({ top: target, behavior: 'instant' });
+      if (Math.abs(deck.scrollTop - target) > 4) jumpNow(target);
     }, 700);
   }
 
